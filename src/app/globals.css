@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nutrigreen: #10b981;
+  --color-nutrigreen-dark: #059669;
+  --color-nutrigreen-light: #d1fae5;
+  --color-nutridark: #111827;
+  --color-nutrigray: #374151;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+@layer components {
+  .card-premium {
+    @apply bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow;
+  }
+  
+  .btn-primary {
+    @apply bg-nutrigreen hover:bg-nutrigreen-dark text-white font-semibold py-3 px-6 rounded-xl transition-all active:scale-95;
+  }
+}
