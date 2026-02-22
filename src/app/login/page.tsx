@@ -13,8 +13,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
+    const [role, setRole] = useState<"client" | "professional">("client");
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,16 +44,20 @@ export default function LoginPage() {
                     email,
                     password,
                     options: {
+                        data: {
+                            role: role,
+                            full_name: email.split("@")[0], // Placeholder que o usuário pode mudar no perfil
+                        },
                         emailRedirectTo: `${window.location.origin}/auth/callback`,
                     },
                 });
                 if (error) throw error;
-                alert("Cadastro realizado! Verifique seu e-mail para confirmar (ou faça login se já confirmado).");
+                alert("Cadastro realizado! Verifique seu e-mail.");
             }
             router.push("/");
             router.refresh();
         } catch (err: any) {
-            setError(err.message || "Ocorreu um erro na autenticação.");
+            setError(err.message || "Erro na autenticação.");
         } finally {
             setLoading(false);
         }
@@ -81,26 +84,45 @@ export default function LoginPage() {
                             <ShieldCheck className="text-white" size={40} />
                         </motion.div>
                         <h1 className="text-3xl font-black text-nutridark tracking-tight italic">
-                            {isLogin ? "Bem-vindo" : "Criar Conta"}
+                            {isLogin ? "Acessar NutriApp" : "Juntar-se à Elite"}
                         </h1>
                         <p className="text-slate-500 font-medium mt-2">
                             {isLogin
-                                ? "Seu portal para uma vida saudável"
-                                : "A revolução da sua nutrição começa aqui"}
+                                ? "Seu portal nutricional profissional"
+                                : "Escolha como quer começar sua jornada"}
                         </p>
                     </div>
 
+                    {!isLogin && (
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <button
+                                onClick={() => setRole("client")}
+                                className={`py-4 rounded-3xl border-2 transition-all font-bold flex flex-col items-center gap-2 ${role === 'client' ? 'border-nutrigreen bg-nutrigreen/5 text-nutrigreen' : 'border-slate-100 text-slate-400'}`}
+                            >
+                                <UserPlus size={20} />
+                                <span className="text-xs uppercase tracking-widest">Paciente</span>
+                            </button>
+                            <button
+                                onClick={() => setRole("professional")}
+                                className={`py-4 rounded-3xl border-2 transition-all font-bold flex flex-col items-center gap-2 ${role === 'professional' ? 'border-nutrigreen bg-nutrigreen/5 text-nutrigreen' : 'border-slate-100 text-slate-400'}`}
+                            >
+                                <ShieldCheck size={20} />
+                                <span className="text-xs uppercase tracking-widest">Nutricionista</span>
+                            </button>
+                        </div>
+                    )}
+
                     <form onSubmit={handleAuth} className="space-y-6 relative z-10">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Corporativo ou Pessoal</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail</label>
                             <div className="relative group">
                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nutrigreen transition-colors" size={20} />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="exemplo@nutri.com"
-                                    className="w-full pl-14 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-4 focus:ring-nutrigreen/5 focus:bg-white focus:border-nutrigreen outline-none transition-all text-nutridark font-bold placeholder:text-slate-300"
+                                    placeholder="exemplo@email.com"
+                                    className="w-full pl-14 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-4 focus:ring-nutrigreen/5 focus:bg-white focus:border-nutrigreen outline-none transition-all text-nutridark font-bold"
                                     required
                                 />
                             </div>
