@@ -190,14 +190,14 @@ export default function ProDashboard() {
 
                                     <form onSubmit={handleAddPatient} className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <ModalInput label="Nome Completo" placeholder="Ex: João Silva" value={newPatient.full_name} onChange={(v) => setNewPatient({ ...newPatient, full_name: v })} />
-                                            <ModalInput label="E-mail de Acesso" placeholder="joao@email.com" type="email" value={newPatient.email} onChange={(v) => setNewPatient({ ...newPatient, email: v })} />
+                                            <ModalInput label="Nome Completo" placeholder="Ex: João Silva" value={newPatient.full_name} onChange={(v: string) => setNewPatient({ ...newPatient, full_name: v })} />
+                                            <ModalInput label="E-mail de Acesso" placeholder="joao@email.com" type="email" value={newPatient.email} onChange={(v: string) => setNewPatient({ ...newPatient, email: v })} />
                                         </div>
 
                                         <div className="grid grid-cols-3 gap-6">
-                                            <ModalInput label="Idade" placeholder="00" value={newPatient.age} onChange={(v) => setNewPatient({ ...newPatient, age: v })} />
-                                            <ModalInput label="Peso (kg)" placeholder="0.0" value={newPatient.weight} onChange={(v) => setNewPatient({ ...newPatient, weight: v })} />
-                                            <ModalInput label="Altura (cm)" placeholder="000" value={newPatient.height} onChange={(v) => setNewPatient({ ...newPatient, height: v })} />
+                                            <ModalInput label="Idade" placeholder="00" value={newPatient.age} onChange={(v: string) => setNewPatient({ ...newPatient, age: v })} />
+                                            <ModalInput label="Peso (kg)" placeholder="0.0" value={newPatient.weight} onChange={(v: string) => setNewPatient({ ...newPatient, weight: v })} />
+                                            <ModalInput label="Altura (cm)" placeholder="000" value={newPatient.height} onChange={(v: string) => setNewPatient({ ...newPatient, height: v })} />
                                         </div>
 
                                         <div className="space-y-4">
