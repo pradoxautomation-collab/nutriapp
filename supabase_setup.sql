@@ -69,14 +69,18 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
 
--- POLÍTICAS RLS PARA PROFILES
-CREATE POLICY "Profiles são visíveis pelo próprio dono" ON profiles
-  FOR ALL USING (auth.uid() = id);
+-- POLÍTICAS RLS PARA PROFILES (Ação Assertiva)
+CREATE POLICY "Leitura de perfil próprio" ON profiles
+  FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Nutricionistas veem seus próprios pacientes" ON profiles
-  FOR SELECT USING (
-    professional_id = auth.uid()
-  );
+CREATE POLICY "Inserção de perfil próprio" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Atualização de perfil próprio" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Nutricionistas veem pacientes" ON profiles
+  FOR SELECT USING (professional_id = auth.uid());
 
 -- POLÍTICAS RLS PARA MEALS
 CREATE POLICY "Refeições visíveis pelo dono" ON meals

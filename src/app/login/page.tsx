@@ -98,8 +98,11 @@ export default function LoginPage() {
                         router.push(profile.role === "professional" ? "/pro" : "/client");
                     } else {
                         // Perfil não existe (usuário antigo ou trigger falhou) - Criar automático
-                        const userRole = email === 'fpradox@gmail.com' ? 'professional' : 'client'; // Admin fix
-                        const { data: newProfile } = await supabase
+                        console.log("Login OK, mas perfil ausente. Criando fallback...");
+                        const isProf = email.trim().toLowerCase() === 'fpradox@gmail.com';
+                        const userRole = isProf ? 'professional' : 'client';
+
+                        const { data: newProfile, error: upsertError } = await supabase
                             .from("profiles")
                             .upsert({
                                 id: data.user.id,
@@ -108,6 +111,13 @@ export default function LoginPage() {
                             })
                             .select("role")
                             .single();
+
+                        if (upsertError) {
+                            console.error("Erro crítico ao criar perfil fallback:", upsertError);
+                            setError("Sua conta foi autenticada, mas houve um erro ao criar seu perfil no banco. Por favor, tente novamente.");
+                            setLoading(false);
+                            return;
+                        }
 
                         if (newProfile) {
                             router.push(newProfile.role === "professional" ? "/pro" : "/client");

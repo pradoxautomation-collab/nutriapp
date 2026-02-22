@@ -47,14 +47,36 @@ export default function ProDashboard() {
                 return;
             }
 
-            const { data: profile } = await supabase
+            let { data: profile, error: profileError } = await supabase
                 .from("profiles")
                 .select("*")
                 .eq("id", session.user.id)
-                .single();
+                .maybeSingle();
+
+            if (!profile && !profileError) {
+                // Orphaned user fallback
+                console.log("Criando perfil órfão em /pro para:", session.user.email);
+                const isProf = session.user.email?.trim().toLowerCase() === 'fpradox@gmail.com';
+                const { data: newProfile, error: upsertError } = await supabase
+                    .from("profiles")
+                    .upsert({
+                        id: session.user.id,
+                        full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+                        role: isProf ? 'professional' : 'client'
+                    })
+                    .select("*")
+                    .single();
+
+                if (upsertError) {
+                    console.error("Falha ao criar perfil órfão:", upsertError);
+                    router.push("/");
+                    return;
+                }
+                profile = newProfile;
+            }
 
             if (profile?.role !== "professional") {
-                router.push("/");
+                router.push(profile?.role === "client" ? "/client" : "/");
                 return;
             }
             setProfile(profile);
