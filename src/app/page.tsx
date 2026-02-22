@@ -25,8 +25,10 @@ export default function RootPage() {
         .single();
 
       if (error || !profile) {
-        console.error("Erro ao carregar perfil:", error);
-        // Fallback para login se der erro grave
+        console.warn("Perfil não encontrado ou erro. Redirecionando...", error);
+        // Se o usuário existe no Auth mas não no Profiles (ex: reset de DB)
+        // O melhor é deslogar para limpar a sessão local
+        await supabase.auth.signOut();
         router.push("/login");
         return;
       }

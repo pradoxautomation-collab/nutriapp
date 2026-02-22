@@ -25,6 +25,8 @@ CREATE TABLE profiles (
   weight_kg NUMERIC,
   height_cm NUMERIC,
   objective TEXT DEFAULT 'maintaining',
+  allergies TEXT, -- Novo: Campo de Alergias
+  medical_history TEXT, -- Novo: Histórico de Doenças
   lgpd_consent_at TIMESTAMP WITH TIME ZONE,
   
   -- Metas (Podem ser setadas pelo Nutri ou pelo Cliente)
