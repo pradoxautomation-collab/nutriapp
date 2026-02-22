@@ -36,12 +36,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    // Evitar que usuários logados acessem /login
-    if (user && pathname === '/login') {
-        const url = request.nextUrl.clone()
-        url.pathname = '/'
-        return NextResponse.redirect(url)
-    }
+    // Não redirecionar usuários logados da /login — eles podem querer trocar de conta
 
     return supabaseResponse
 }
