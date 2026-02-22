@@ -3,14 +3,20 @@ import { getGeminiModel, nutritionPrompt } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
     try {
-        const { text } = await req.json();
+        const { text, profile } = await req.json();
 
         if (!text) {
             return NextResponse.json({ error: "Texto não fornecido" }, { status: 400 });
         }
 
         const model = getGeminiModel();
-        const result = await model.generateContent(nutritionPrompt.replace("{text}", text));
+        const prompt = nutritionPrompt
+            .replace("{text}", text)
+            .replace("{age}", profile?.age?.toString() || "30")
+            .replace("{weight}", profile?.weight_kg?.toString() || "70")
+            .replace("{objective}", profile?.objective || "manter peso");
+
+        const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 
         // Limpa a resposta para garantir que seja apenas o JSON

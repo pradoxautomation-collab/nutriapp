@@ -481,7 +481,7 @@ export default function Home() {
   );
 }
 
-function MacroBar2({ label, current, target, color }: any) {
+function MacroBar2({ label, current, target, color }: { label: string, current: number, target: number, color: string }) {
   const percentage = Math.min((current / target) * 100, 100);
   return (
     <div className="space-y-4">
@@ -506,7 +506,7 @@ function MacroBar2({ label, current, target, color }: any) {
   );
 }
 
-function InputField({ label, value, onChange, placeholder, type = "text" }: any) {
+function InputField({ label, value, onChange, placeholder, type = "text" }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, type?: string }) {
   return (
     <div className="space-y-1">
       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{label}</label>
@@ -515,7 +515,7 @@ function InputField({ label, value, onChange, placeholder, type = "text" }: any)
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl outline-none focus:ring-2 focus:ring-nutrigreen/20 font-bold placeholder:text-slate-300 transition-all"
+        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl outline-none focus:ring-2 focus:ring-nutrigreen/20 font-bold placeholder:text-slate-300 transition-all text-slate-900"
       />
     </div>
   );
