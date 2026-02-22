@@ -1,3 +1,9 @@
+-- Limpar estruturas existentes para reconstrução (Versão 2.0)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+DROP TABLE IF EXISTS meals;
+DROP TABLE IF EXISTS profiles;
+
 -- Tabela de Configurações/Perfil do Usuário (Metas e Biometria)
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
@@ -33,11 +39,9 @@ ALTER TABLE meals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- Políticas
-DROP POLICY IF EXISTS "Usuários podem ver suas próprias refeições" ON meals;
 CREATE POLICY "Privacidade: Usuários acessam apenas seus dados" ON meals
   FOR ALL USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON profiles;
 CREATE POLICY "Privacidade: Perfil pessoal" ON profiles
   FOR ALL USING (auth.uid() = id);
 
