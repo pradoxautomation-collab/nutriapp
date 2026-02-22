@@ -4,12 +4,15 @@ import { useState, useEffect } from "react";
 import { Plus, Target, Zap, Waves, Flame, Camera, Loader2, History, Utensils } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [mealText, setMealText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [meals, setMeals] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
   const [dailyData, setDailyData] = useState({
     consumed: 0,
     target: 2000,
@@ -18,18 +21,31 @@ export default function Home() {
     fat: 0
   });
 
-  // Carregar dados iniciais
+  // Verificar autenticação
   useEffect(() => {
-    fetchTodayMeals();
-  }, []);
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+      } else {
+        setUser(session.user);
+        fetchTodayMeals(session.user.id);
+      }
+    };
+    checkUser();
+  }, [router]);
 
-  const fetchTodayMeals = async () => {
+  const fetchTodayMeals = async (userId?: string) => {
+    const activeUserId = userId || user?.id;
+    if (!activeUserId) return;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const { data, error } = await supabase
       .from("meals")
       .select("*")
+      .eq("user_id", activeUserId)
       .gte("created_at", today.toISOString())
       .order("created_at", { ascending: false });
 
@@ -52,7 +68,7 @@ export default function Home() {
   };
 
   const handleAnalyze = async () => {
-    if (!mealText) return;
+    if (!mealText || !user) return;
     setIsAnalyzing(true);
 
     try {
@@ -65,10 +81,11 @@ export default function Home() {
       const data = await response.json();
 
       if (data.calories) {
-        // Salvar no Supabase
+        // Salvar no Supabase associado ao usuário
         const { error: dbError } = await supabase
           .from("meals")
           .insert([{
+            user_id: user.id,
             food_name: data.food_name,
             calories: data.calories,
             protein: data.protein,
@@ -90,6 +107,11 @@ export default function Home() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   return (
     <main className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto pb-24">
       {/* Header */}
@@ -98,15 +120,24 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-nutridark flex items-center gap-2">
             <span className="text-nutrigreen text-3xl">🌿</span> NutriAI
           </h1>
-          <p className="text-slate-500">Seu assistente nutricional inteligente</p>
+          <p className="text-slate-500 text-xs sm:text-sm">Seu assistente nutricional inteligente</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Registrar Refeição
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleLogout}
+            className="p-3 text-slate-400 hover:text-red-500 transition-colors bg-white rounded-2xl border border-slate-100 shadow-sm"
+            title="Sair"
+          >
+            <LogIn size={20} className="rotate-180" />
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus size={20} />
+            <span className="hidden sm:inline">Refeição</span>
+          </button>
+        </div>
       </header>
 
       {/* Resumo do Dia */}
