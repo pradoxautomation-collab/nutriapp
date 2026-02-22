@@ -47,12 +47,13 @@ export async function middleware(request: NextRequest) {
         const url = request.nextUrl.clone()
         if (profile?.role === 'professional') {
             url.pathname = '/pro'
+            return NextResponse.redirect(url)
         } else if (profile?.role === 'client') {
             url.pathname = '/client'
-        } else {
-            url.pathname = '/'
+            return NextResponse.redirect(url)
         }
-        return NextResponse.redirect(url)
+        // Se cair aqui (profile null), não redireciona! 
+        // Deixa a página carregar para que o fallback de criação de perfil no client-side funcione.
     }
 
     return supabaseResponse

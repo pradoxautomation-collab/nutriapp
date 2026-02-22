@@ -20,12 +20,29 @@ export default function LandingPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           setSession(user);
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", user.id)
             .maybeSingle();
-          setProfile(profile);
+
+          if (!profile && !profileError) {
+            // Perfil não existe (usuário antigo ou trigger falhou) - Criar automático
+            console.log("Criando perfil automático para:", user.email);
+            const userRole = user.email === 'fpradox@gmail.com' ? 'professional' : 'client'; // Garantir que o admin seja pro
+            const { data: newProfile } = await supabase
+              .from("profiles")
+              .upsert({
+                id: user.id,
+                full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+                role: userRole
+              })
+              .select("role")
+              .single();
+            setProfile(newProfile);
+          } else {
+            setProfile(profile);
+          }
         }
       } catch (err) {
         console.error("Erro ao verificar autenticação:", err);

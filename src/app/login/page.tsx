@@ -34,7 +34,23 @@ export default function LoginPage() {
                     if (profile) {
                         router.push(profile.role === "professional" ? "/pro" : "/client");
                     } else {
-                        router.push("/");
+                        // User exists but profile doesn't - Create it
+                        const userRole = user.email === 'fpradox@gmail.com' ? 'professional' : 'client';
+                        const { data: newProfile } = await supabase
+                            .from("profiles")
+                            .upsert({
+                                id: user.id,
+                                full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+                                role: userRole
+                            })
+                            .select("role")
+                            .single();
+
+                        if (newProfile) {
+                            router.push(newProfile.role === "professional" ? "/pro" : "/client");
+                        } else {
+                            router.push("/");
+                        }
                     }
                 }
             } catch (err) {
@@ -81,7 +97,23 @@ export default function LoginPage() {
                     if (profile) {
                         router.push(profile.role === "professional" ? "/pro" : "/client");
                     } else {
-                        router.push("/");
+                        // Perfil não existe (usuário antigo ou trigger falhou) - Criar automático
+                        const userRole = email === 'fpradox@gmail.com' ? 'professional' : 'client'; // Admin fix
+                        const { data: newProfile } = await supabase
+                            .from("profiles")
+                            .upsert({
+                                id: data.user.id,
+                                full_name: data.user.user_metadata?.full_name || email.split('@')[0],
+                                role: userRole
+                            })
+                            .select("role")
+                            .single();
+
+                        if (newProfile) {
+                            router.push(newProfile.role === "professional" ? "/pro" : "/client");
+                        } else {
+                            router.push("/");
+                        }
                     }
                 }
                 router.refresh();
