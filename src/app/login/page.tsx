@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,31 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [role, setRole] = useState<"client" | "professional">("client");
     const router = useRouter();
+
+    // Check if user is already logged in
+    useEffect(() => {
+        const checkUser = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .maybeSingle();
+
+                    if (profile) {
+                        router.push(profile.role === "professional" ? "/pro" : "/client");
+                    } else {
+                        router.push("/");
+                    }
+                }
+            } catch (err) {
+                console.error("Erro no checkUser:", err);
+            }
+        };
+        checkUser();
+    }, [router]);
 
     const resetState = (newView: AuthView) => {
         setError(null);
@@ -43,9 +68,22 @@ export default function LoginPage() {
 
         try {
             if (view === "login") {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                router.push("/");
+
+                if (data.user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", data.user.id)
+                        .maybeSingle();
+
+                    if (profile) {
+                        router.push(profile.role === "professional" ? "/pro" : "/client");
+                    } else {
+                        router.push("/");
+                    }
+                }
                 router.refresh();
             } else if (view === "signup") {
                 const { error } = await supabase.auth.signUp({

@@ -75,10 +75,7 @@ CREATE POLICY "Profiles são visíveis pelo próprio dono" ON profiles
 
 CREATE POLICY "Nutricionistas veem seus próprios pacientes" ON profiles
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM profiles AS p 
-      WHERE p.id = auth.uid() AND p.role = 'professional'
-    ) AND professional_id = auth.uid()
+    professional_id = auth.uid()
   );
 
 -- POLÍTICAS RLS PARA MEALS

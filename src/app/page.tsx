@@ -7,7 +7,33 @@ import {
   CheckCircle, Star, Zap, FileText, Calendar
 } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+
 export default function LandingPage() {
+  const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setSession(user);
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+          setProfile(profile);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar autenticação:", err);
+      }
+    };
+    checkAuth();
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-50 font-sans overflow-hidden">
 
@@ -24,12 +50,23 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-slate-500 font-bold text-sm hover:text-nutridark transition-colors">
-              Entrar
-            </Link>
-            <Link href="/login" className="bg-nutrigreen text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-nutrigreen/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-              Começar Grátis <ArrowRight size={16} />
-            </Link>
+            {session ? (
+              <Link
+                href={profile?.role === "professional" ? "/pro" : "/client"}
+                className="bg-nutrigreen text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-nutrigreen/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                Ir para o Dashboard <ArrowRight size={16} />
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-slate-500 font-bold text-sm hover:text-nutridark transition-colors">
+                  Entrar
+                </Link>
+                <Link href="/login" className="bg-nutrigreen text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-nutrigreen/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                  Começar Grátis <ArrowRight size={16} />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -63,19 +100,30 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/login"
-                className="bg-nutridark text-white px-8 py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-black/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
-              >
-                Acesse seu Painel <ArrowRight size={20} />
-              </Link>
-              <Link
-                href="/login"
-                className="bg-white text-nutridark px-8 py-5 rounded-[2rem] font-black text-lg border border-slate-200 hover:border-nutrigreen hover:text-nutrigreen transition-all flex items-center justify-center gap-3"
-              >
-                <Users size={20} />
-                Sou Paciente
-              </Link>
+              {session ? (
+                <Link
+                  href={profile?.role === "professional" ? "/pro" : "/client"}
+                  className="bg-nutridark text-white px-10 py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-black/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  Ir para o Dashboard <ArrowRight size={20} />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="bg-nutridark text-white px-8 py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-black/10 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                  >
+                    Acesse seu Painel <ArrowRight size={20} />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="bg-white text-nutridark px-8 py-5 rounded-[2rem] font-black text-lg border border-slate-200 hover:border-nutrigreen hover:text-nutrigreen transition-all flex items-center justify-center gap-3"
+                  >
+                    <Users size={20} />
+                    Sou Paciente
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         </div>

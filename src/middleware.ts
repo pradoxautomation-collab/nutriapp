@@ -36,7 +36,24 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    // Não redirecionar usuários logados da /login — eles podem querer trocar de conta
+    // Se o usuário está logado e tenta acessar /login, manda para o dashboard correto
+    if (user && pathname === '/login') {
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        const url = request.nextUrl.clone()
+        if (profile?.role === 'professional') {
+            url.pathname = '/pro'
+        } else if (profile?.role === 'client') {
+            url.pathname = '/client'
+        } else {
+            url.pathname = '/'
+        }
+        return NextResponse.redirect(url)
+    }
 
     return supabaseResponse
 }
